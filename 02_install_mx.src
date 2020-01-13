@@ -50,3 +50,6 @@ systemctl start opendmarc
 systemctl enable opendmarc
 systemctl status opendmarc
 
+# make let's encrypt auto renew work
+sed "s/certbot renew --post-hook 'systemctl reload httpd'/certbot renew --post-hook 'systemctl reload httpd postfix dovecot'/" -i /etc/cron.d/certbot
+
