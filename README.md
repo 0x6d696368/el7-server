@@ -219,6 +219,20 @@ rm -f /var/named/*.jnl
 systemctl start named
 ```
 
+#### `setsockopt(25, TCP_FASTOPEN) failed with Protocol not available`
+
+In case your named doesn't work and you get:
+
+```
+# systemctl status named | grep TCP_FASTOPEN
+Feb 17 19:00:37 spamtrap named[381]: setsockopt(24, TCP_FASTOPEN) failed with Protocol not available
+```
+
+Your system does not support `TCP_FASTOPEN`. 
+Unfortunately, there doesn't seem to be a workaround as this only happens when you run
+this on a deprecated kernel that CentOS 7 does not support anymore. Most likely scenario
+is you run inside a container, e.g. OpenVZ. Get new hosting!
+
 ### 02_install_mx.sh (Postfix + Dovecot mail server)
 
 Requires: `02_install_http.sh` (to acquire certificate from Let's Encrypt), **optional** `02_install_ns1.sh` (**without** running `/usr/local/sbin/el7-bind_config` to make Spamhaus RBL DNS queries work)
