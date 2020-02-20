@@ -1,6 +1,6 @@
 #!/bin/bash
 yum -y install epel-release openssl
-yum -y install postfix dovecot postfix-pcre opendkim opendmarc 
+yum -y install postfix dovecot postfix-pcre opendkim opendmarc postgrey
 rm -rf /etc/dovecot/conf.d
 
 # SPF ... this is a bit ugly
@@ -354,11 +354,13 @@ smtpd_relay_restrictions =
 smtpd_client_restrictions =
 	permit_mynetworks,
 	permit_sasl_authenticated,
+#	reject_unknown_reverse_client_hostname,
 	check_policy_service unix:private/policyd-spf,
 #       check_client_access hash:/etc/postfix/check_client_access,
 #       check_sender_access hash:/etc/postfix/check_sender_access,
 #       check_recipient_access hash:/etc/postfix/check_recipient_access,
 	reject_rbl_client zen.spamhaus.org,
+#	reject rhsbl_client dbl.spamhaus.org,
 	permit
 smtpd_helo_restrictions =
 	permit_mynetworks,
@@ -377,10 +379,13 @@ smtpd_sender_restrictions =
 	reject_non_fqdn_sender,
 	reject_unknown_sender_domain,
 	reject_unlisted_sender,
+#	reject_unknown_reverse_client_hostname,
+#	reject_unknown_client_hostname,
 	permit
 smtpd_recipient_restrictions =
 	permit_mynetworks,
 	permit_sasl_authenticated,
+#	check_policy_service unix:postgrey/socket,
 	reject_unauth_destination,
 #       check_recipient_access hash:/etc/postfix/check_recipient_access,
 	reject_invalid_hostname,
@@ -1103,6 +1108,9 @@ systemctl status opendkim
 systemctl start opendmarc
 systemctl enable opendmarc
 systemctl status opendmarc
+systemctl start postgrey
+systemctl enable postgrey
+systemctl status postgrey
 
 # make let's encrypt auto renew work
 sed "s/certbot renew --post-hook 'systemctl reload httpd'/certbot renew --post-hook 'systemctl reload httpd postfix dovecot'/" -i /etc/cron.d/certbot

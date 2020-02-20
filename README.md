@@ -287,6 +287,18 @@ Run `/usr/local/sbin/el7-mx_dkim` and follow the instructions.
 
 TODO: automate this
 
+#### Greylisting
+
+To enable greylisting uncomment `# check_policy_service unix:postgrey/socket,` in `/etc/postfix/main.cf`.
+
+Also to further decrese spam by being more strict on rejecting incoming senders - this may cause delivery problems! -
+you can uncomment:
+
+- `# reject_unknown_reverse_client_hostname,`
+- `# reject rhsbl_client dbl.spamhaus.org,`
+- `# reject_unknown_reverse_client_hostname,`
+- `# reject_unknown_client_hostname,`
+
 #### TODOs
 
 - FIXME: dhparam <http://www.postfix.org/FORWARD_SECRECY_README.html>

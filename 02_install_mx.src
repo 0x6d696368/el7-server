@@ -1,6 +1,6 @@
 #!/bin/bash
 yum -y install epel-release openssl
-yum -y install postfix dovecot postfix-pcre opendkim opendmarc 
+yum -y install postfix dovecot postfix-pcre opendkim opendmarc postgrey
 rm -rf /etc/dovecot/conf.d
 
 # SPF ... this is a bit ugly
@@ -49,6 +49,9 @@ systemctl status opendkim
 systemctl start opendmarc
 systemctl enable opendmarc
 systemctl status opendmarc
+systemctl start postgrey
+systemctl enable postgrey
+systemctl status postgrey
 
 # make let's encrypt auto renew work
 sed "s/certbot renew --post-hook 'systemctl reload httpd'/certbot renew --post-hook 'systemctl reload httpd postfix dovecot'/" -i /etc/cron.d/certbot
