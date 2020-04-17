@@ -45,7 +45,29 @@ domain and/or IP.
 
 ### 01_install_base.sh
 
-This sets up auto-updates and private key only SSH login over an alternate SSH port
+This sets up auto-updates, remove hosting monitoring, install default kernel, etc.
+
+1. Install `01_install_base.sh` by running (on your local machine):
+
+```
+cat 01_install_base.sh | ssh root@192.168.42.42
+```
+
+The `01_install_base.sh` installs and configures:
+
+- Standard kernel (to ensure security updates) 
+- Time (UTC all the way!)
+- Auto updates with auto reboots on library and kernel updates
+- firewall
+
+#### Logging
+
+- yum: `/var/log/yum.log` (displays the last updated packages)
+- cron: `/var/log/cron` (should contain hourly entries of `starting 0yum-hourly.cron` and `starting 9needs-restarting.cron`)
+
+### 02_install_ssh.sh
+
+This sets up private key only SSH login over an alternate SSH port
 (to keep the logs clean and not have your SSH listed on Shodan.)
 
 **NOTE:** Please follow these instructions closely, otherwise you may lock
@@ -61,13 +83,13 @@ scp ~/.ssh/id_ed25519_hostname.pub root@192.168.42.42:~/.ssh/authorized_keys
 
 2. Open a SSH connection to the server **and keep it open** and perform the following tasks over different SSH connections (so you can recover in case something fails with the SSH setup).
 
-3. Install `01_install_base.sh` by running (on your local machine):
+3. Install `02_install_ssh.sh` by running (on your local machine):
 
 ```
-cat 01_install_base.sh | ssh root@192.168.42.42
+cat 02_install_ssh.sh | ssh root@192.168.42.42
 ```
 
-4. After installing the `01_install_base.sh` script login in via:
+4. After installing the `02_install_ssh.sh` script login in via:
 
 ```
 ssh root@192.168.42.42 -i ~/.ssh/id_ed25519_hostname -p 226
@@ -92,12 +114,8 @@ And then simply login via:
 ssh myhostalias
 ```
 
+The `02_install_ssh.sh` installs and configures:
 
-The `01_install_base.sh` installs and configures:
-
-- Standard kernel (to ensure security updates) 
-- Time (UTC all the way!)
-- Auto updates with auto reboots on library and kernel updates
 - SSH (pubkey only, ed25519 only, and port 226 (for additional security))
 - firewall
 - rate limiting connection attempts to SSH to 3 / min per IP
@@ -132,8 +150,6 @@ firewall-cmd --direct --get-all-rules
 #### Logging
 
 - SSH: `cat /var/log/secure | grep sshd` (see ssh login attempts, etc.)
-- yum: `/var/log/yum.log` (displays the last updated packages)
-- cron: `/var/log/cron` (should contain hourly entries of `starting 0yum-hourly.cron` and `starting 9needs-restarting.cron`)
 
 #### TODOs
 
@@ -186,7 +202,7 @@ In case you want a ns1 (master/primary) and ns2 (slave/secondary) nameserver set
 1. After install run `/usr/local/sbin/el7-bind_config <IP of ns1> <IP of ns2>` to configure the ns1 and ns2 IPs in `/etc/named.conf`.
 2. Edit `/etc/named/zones` to add your zones (do this on both ns1 and ns2)
 3. Edit your zones, for `example.com` the file would be in  `/var/named/example.com` etc. (only on ns1, ns2 gets the updates via DNS update mechanism)
-4. Optional: Follow DNSSEC setup below
+4. Follow DNSSEC setup below
 
 #### DNSSEC
 
@@ -194,6 +210,14 @@ To sign your zones in `/var/named/example.com` (only available on ns1) do:
 
 1. To setup DNSSEC for a zone, i.e., generate (or regenerate) keys, etc. run: `/usr/local/sbin/el7-dnssec_setup example.com`
 2. To (re-)sign a zone, run: `/usr/local/sbin/el7-dnssec_sign example.com`
+
+#### Debugging
+
+Check your zone via:
+
+```
+named-checkzone example.com /var/named/example.com
+```
 
 #### Logging
 
@@ -207,7 +231,7 @@ To sign your zones in `/var/named/example.com` (only available on ns1) do:
 - CDS: does not work in RHEL7
 - When BIND 9.11 add query response logging via dnstap
 
-#### Fixes
+#### Fixes / Issues
 
 ##### Journal errors
 
@@ -219,7 +243,7 @@ rm -f /var/named/*.jnl
 systemctl start named
 ```
 
-#### `setsockopt(25, TCP_FASTOPEN) failed with Protocol not available`
+##### `setsockopt(25, TCP_FASTOPEN) failed with Protocol not available`
 
 In case your named doesn't work and you get:
 

@@ -12,7 +12,7 @@ AuthorizedKeysFile %h/.ssh/authorized_keys
 PermitRootLogin prohibit-password # NOTE: change to 'no' for multiuser system
 UsePAM yes
 
-AuthenticationMethods publickey #,keyboard-interactive # TODO: do 2FA or kerberos
+AuthenticationMethods publickey #,keyboard-interactive # TODO: do 2FA
 PubkeyAuthentication yes
 PermitEmptyPasswords no
 HostbasedAuthentication no

@@ -1,6 +1,6 @@
-$ORIGIN example.com
+$ORIGIN example.com.
 $TTL 1d
-@ IN SOA ns1.example.com. info.example.com. (
+@ IN SOA ns1.example.com. hostmaster.example.com. (
 	2019011301 ; serial
 	12h ; refresh
 	1h ; retry
