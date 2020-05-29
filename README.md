@@ -37,8 +37,8 @@ Tested on/with:
 The scripts themselves can be installed individually, however, it is recommended
 to at least install 01* script before installing any 02* script.
 
-Either run directly on server as `./02_install_http.sh` or run remotely
-via SSH as `cat 02_install_http.sh | ssh root@yourserver`
+Either run directly on server as `./03_install_http.sh` or run remotely
+via SSH as `cat 03_install_http.sh | ssh root@yourserver`
 
 **Note:** In the examples `example.com` and `192.168.42.42` are your servers
 domain and/or IP.
@@ -142,9 +142,14 @@ cat /proc/net/xt_recent/SSH_RATELIMIT
 ```
 
 **NOTE:** To see possible active rate limiting rules run:
-
 ```bash
 firewall-cmd --direct --get-all-rules
+```
+
+**NOTE:** To add or remove a SSH IP to/from the rate limiting whitelist use:
+```bash
+/usr/local/sbin/el7-firewall_add_whitelist_ssh
+/usr/local/sbin/el7-firewall_remove_whitelist_ssh
 ```
 
 #### Logging
@@ -156,7 +161,7 @@ firewall-cmd --direct --get-all-rules
 * Setup knockd: https://www.digitalocean.com/community/tutorials/how-to-use-port-knocking-to-hide-your-ssh-daemon-from-attackers-on-ubuntu
 
 
-### 02_install_http.sh (Apache and Let's Encrypt)
+### 03_install_http.sh (Apache and Let's Encrypt)
 
 Installs and configures Apache.
 
@@ -191,11 +196,11 @@ To get a domain redirection change the configuration in step 3 above to `Use red
 - FIXME: Stapling on the IP host with the self signed SSL cert does not work and floods error_log (`ssl_stapling_init_cert: can't retrieve issuer certificate!`)
 - TODO: deal with FQDN trailing dots; this leads to TLS failing as `example.com` != `example.com.`
 
-### 02_install_ns{1,2}.sh (BIND name server)
+### 03_install_ns{1,2}.sh (BIND name server)
 
 Installs and configures BIND name server.
 
-**NOTE:** In case you only want a local recursive nameserver (e.g. to run RBL DNS queries as  prerequisite to `02_install_mx.sh`) just run `02_install_ns1.sh` and you don't need to do any post install configuration.
+**NOTE:** In case you only want a local recursive nameserver (e.g. to run RBL DNS queries as  prerequisite to `03_install_mx.sh`) just run `03_install_ns1.sh` and you don't need to do any post install configuration.
 
 In case you want a ns1 (master/primary) and ns2 (slave/secondary) nameserver setup do the following:
 
@@ -245,7 +250,7 @@ systemctl start named
 
 ##### `setsockopt(25, TCP_FASTOPEN) failed with Protocol not available`
 
-In case your named doesn't work and you get:
+In c3se your named doesn't work and you get:
 
 ```
 # systemctl status named | grep TCP_FASTOPEN
@@ -257,9 +262,9 @@ Unfortunately, there doesn't seem to be a workaround as this only happens when y
 this on a deprecated kernel that CentOS 7 does not support anymore. Most likely scenario
 is you run inside a container, e.g. OpenVZ. Get new hosting!
 
-### 02_install_mx.sh (Postfix + Dovecot mail server)
+### 03_install_mx.sh (Postfix + Dovecot mail server)
 
-Requires: `02_install_http.sh` (to acquire certificate from Let's Encrypt), **optional** `02_install_ns1.sh` (**without** running `/usr/local/sbin/el7-bind_config` to make Spamhaus RBL DNS queries work)
+Requires: `03_install_http.sh` (to acquire certificate from Let's Encrypt), **optional** `03_install_ns1.sh` (**without** running `/usr/local/sbin/el7-bind_config` to make Spamhaus RBL DNS queries work)
 
 This sets up:
 
@@ -270,7 +275,7 @@ This sets up:
 
 #### Setup
 
-1. **Optional:** Get a Let's Encrypt certificate for your mx domain by following the `02_install_http.sh` setup.
+1. **Optional:** Get a Let's Encrypt certificate for your mx domain by following the `03_install_http.sh` setup.
 2. Run `/usr/local/sbin/el7-mx_config mx.example.com` to configure the MX domain `mx.example.com`
 
 #### Add a mail box (user)
@@ -285,7 +290,7 @@ This will prompt for a password you would like to set for `user@example.com`.
 
 This will generate a postfix mailbox as well as a POP3 Dovecot mailbox by editing the following files:
 
-- `/etc/postfix/vhosts
+- `/etc/postfix/vhosts`
 - `/etc/postfix/vmaps` (and (re-)generating `/etc/postfix/vmaps.db`)
 - `/etc/dovecot/users`
 - `/etc/dovecot/passwd`
