@@ -11,14 +11,16 @@ yum -y install policycoreutils-python
 # make el7- scripts executable
 chmod u+x /usr/local/sbin/el7-*
 
-firewall-cmd --permanent --add-port=226/tcp --zone=public
-semanage port -a -t ssh_port_t -p tcp 226
+SSH_PORT="$(grep -E '^Port [0-9]+' /etc/ssh/sshd_config | grep -oE '[0-9]+' | head -n1)"
 
-# rate limit tcp connections to SSH on 226/tcp to 3 per minute
-firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT_direct 10 -p tcp --dport 226 -m state --state NEW -m recent --set --name SSH_RATELIMIT
-firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT_direct 11 -p tcp --dport 226 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j REJECT --reject-with tcp-reset --name SSH_RATELIMIT
-firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT_direct 10 -p tcp --dport 226 -m state --state NEW -m recent --set --name SSH_RATELIMIT
-firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT_direct 11 -p tcp --dport 226 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j REJECT --reject-with tcp-reset --name SSH_RATELIMIT
+firewall-cmd --permanent --add-port=${SSH_PORT}/tcp --zone=public
+semanage port -a -t ssh_port_t -p tcp ${SSH_PORT}
+
+# rate limit tcp connections to SSH on ${SSH_PORT}/tcp to 3 per minute
+firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT_direct 10 -p tcp --dport ${SSH_PORT} -m state --state NEW -m recent --set --name SSH_RATELIMIT
+firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT_direct 11 -p tcp --dport ${SSH_PORT} -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j REJECT --reject-with tcp-reset --name SSH_RATELIMIT
+firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT_direct 10 -p tcp --dport ${SSH_PORT} -m state --state NEW -m recent --set --name SSH_RATELIMIT
+firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT_direct 11 -p tcp --dport ${SSH_PORT} -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j REJECT --reject-with tcp-reset --name SSH_RATELIMIT
 systemctl start sshd
 systemctl enable sshd
 systemctl reload sshd

@@ -152,6 +152,8 @@ firewall-cmd --direct --get-all-rules
 /usr/local/sbin/el7-firewall_remove_whitelist_ssh
 ```
 
+**NOTE:** You can change your SSH port in `/etc/ssh/sshd_config`. Please note scripts rely on `Port 321` syntax. Adding more spaces or something else will break the scripts. In case you have multiple ports, e.g., `Port 123 432` only the first will be used.
+
 #### Logging
 
 - SSH: `cat /var/log/secure | grep sshd` (see ssh login attempts, etc.)

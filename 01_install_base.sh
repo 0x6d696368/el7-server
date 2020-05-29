@@ -55,9 +55,6 @@ firewall-cmd --permanent --zone=public --change-interface="$(ip route | grep def
 # COPY CONFIGURATION FILES
 mkdir -p /etc
 mkdir -p /etc/yum
-mkdir -p /usr
-mkdir -p /usr/local
-mkdir -p /usr/local/sbin
 cat > /etc/logrotate.conf << PASTECONFIGURATIONFILE
 # see "man logrotate" for details
 # rotate log files weekly
@@ -259,48 +256,6 @@ mdpolicy = group:main
 
 # Uncomment to auto-import new gpg keys (dangerous)
 # assumeyes = True
-PASTECONFIGURATIONFILE
-cat > /usr/local/sbin/el7-firewall_remove_whitelist_ssh << PASTECONFIGURATIONFILE
-#!/bin/bash
-if [ \$# -gt 1 ]; then
-	echo "Remove SSH IP from white list"
-	echo
-	echo "usage: \${0} [IP]"
-	echo
-	echo "If IP is not given IP from \\\$SSH_CLIENT will be used."
-	echo
-	exit 1
-fi
-if [ \$# -eq 0 ]; then
-	IP="\$(echo \$SSH_CLIENT | cut -d' ' -f1)"
-	echo "No IP given using IP from \\\$SSH_CLIENT (\${IP})"
-else
-	IP="\${1}"
-fi
-firewall-cmd --permanent --direct --remove-rule ipv4 filter INPUT_direct 0 -p tcp -s "\${IP}" --dport 226 -m state --state NEW -j ACCEPT
-firewall-cmd --reload
-
-PASTECONFIGURATIONFILE
-cat > /usr/local/sbin/el7-firewall_add_whitelist_ssh << PASTECONFIGURATIONFILE
-#!/bin/bash
-if [ \$# -gt 1 ]; then
-	echo "Whitelist the SSH IP"
-	echo
-	echo "usage: \${0} [IP]"
-	echo
-	echo "If IP is not given IP from \\\$SSH_CLIENT will be used."
-	echo
-	exit 1
-fi
-if [ \$# -eq 0 ]; then
-	IP="\$(echo \$SSH_CLIENT | cut -d' ' -f1)"
-	echo "No IP given using IP from \\\$SSH_CLIENT (\${IP})"
-else
-	IP="\${1}"
-fi
-firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT_direct 0 -p tcp -s "\${IP}" --dport 226 -m state --state NEW -j ACCEPT
-firewall-cmd --reload
-
 PASTECONFIGURATIONFILE
 # COPY CONFIGURATION FILES
 
