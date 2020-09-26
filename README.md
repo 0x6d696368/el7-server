@@ -1,3 +1,5 @@
+**DEPRECATED! PLEASE USE CENTOS 8 INSTEAD: <https://github.com/0x6d696368/el8-server>**
+
 # CENTOS 7 SERVER SCRIPTS
 
 Bootstrap a base CentOS 7 server system starting from a Minimal Install.
@@ -129,10 +131,10 @@ so you can rescue the setup in case you lock yourself out of the system. Only cl
 
 **NOTE:** To remove the rate limiting run:
 ```
-firewall-cmd --permanent --direct --remove-rule ipv4 filter INPUT_direct 0 -p tcp --dport 226 -m state --state NEW -m recent --set --name SSH_RATELIMIT
-firewall-cmd --permanent --direct --remove-rule ipv4 filter INPUT_direct 1 -p tcp --dport 226 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j REJECT --reject-with tcp-reset --name SSH_RATELIMIT
-firewall-cmd --permanent --direct --remove-rule ipv6 filter INPUT_direct 0 -p tcp --dport 226 -m state --state NEW -m recent --set --name SSH_RATELIMIT
-firewall-cmd --permanent --direct --remove-rule ipv6 filter INPUT_direct 1 -p tcp --dport 226 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j REJECT --reject-with tcp-reset --name SSH_RATELIMIT
+firewall-cmd --permanent --direct --remove-rule ipv4 filter INPUT_direct 10 -p tcp --dport 226 -m state --state NEW -m recent --set --name SSH_RATELIMIT
+firewall-cmd --permanent --direct --remove-rule ipv4 filter INPUT_direct 11 -p tcp --dport 226 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j REJECT --reject-with tcp-reset --name SSH_RATELIMIT
+firewall-cmd --permanent --direct --remove-rule ipv6 filter INPUT_direct 10 -p tcp --dport 226 -m state --state NEW -m recent --set --name SSH_RATELIMIT
+firewall-cmd --permanent --direct --remove-rule ipv6 filter INPUT_direct 11 -p tcp --dport 226 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j REJECT --reject-with tcp-reset --name SSH_RATELIMIT
 firewall-cmd --reload
 ```
 
@@ -379,6 +381,22 @@ openssl s_client -crlf -connect mx.example.com:465 -servername mx.example.com
 openssl s_client -crlf -connect mx.example.com:995 -servername mx.example.com
 ```
 
+### `80_xpra.sh`
+
+- Start a session:
+
+```
+xpra --ssh=ssh attach ssh://sshserver/100 --start=xterm
+```
+
+Detach session via `CTRL+C`.
+
+Attach to session again:
+
+```
+xpra --ssh=ssh attach ssh://sshserver/100
+```
+
 ## Admin tasks
 
 ### Block IP
@@ -402,6 +420,10 @@ firewall-cmd --zone=drop --remove-source=<CIDR>
 ```
 
 ## Trouble shooting
+
+### firewall-cmd
+
+- If `firewall-cmd --reload` returns `Error: COMMAND_FAILED: Direct: '/usr/sbin/iptables-restore -w -n' failed: iptables-restore: line x failed` you can delete all direct rules via `rm /etc/firewalld/direct.xml`.
 
 ### rsyslog
 
